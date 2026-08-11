@@ -76,7 +76,6 @@
             transform: scale(0.95);
         }
 
-        /* Live Announcement Ticker */
         .announcement-bar {
             width: 100%;
             max-width: 500px;
@@ -151,7 +150,7 @@
             border-left: 14px solid transparent;
             border-right: 14px solid transparent;
             border-top: 26px solid #facc15;
-            z-index: 20;
+            z-index: 30;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.8));
             transform-origin: 50% 0%;
         }
@@ -165,7 +164,6 @@
             animation: tickBounce 0.15s ease-in-out;
         }
 
-        /* Casino Gold / Red Frame with Glow */
         .arcade-frame {
             position: absolute;
             width: 310px;
@@ -188,12 +186,67 @@
             transform: translate(-50%, -50%);
         }
 
-        .svg-wheel {
-            width: 280px;
-            height: 280px;
+        .css-wheel {
+            position: absolute;
+            width: 276px;
+            height: 276px;
             border-radius: 50%;
             box-shadow: 0 0 15px rgba(0,0,0,0.9);
             transition: transform 4.5s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            z-index: 15;
+            overflow: hidden;
+            background: conic-gradient(
+                #dc2626 0deg 36deg,
+                #facc15 36deg 72deg,
+                #dc2626 72deg 108deg,
+                #facc15 108deg 144deg,
+                #dc2626 144deg 180deg,
+                #facc15 180deg 216deg,
+                #dc2626 216deg 252deg,
+                #facc15 252deg 288deg,
+                #dc2626 288deg 324deg,
+                #facc15 324deg 360deg
+            );
+        }
+
+        .wheel-labels {
+            position: absolute;
+            width: 276px;
+            height: 276px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 20;
+            transition: transform 4.5s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        }
+
+        .wheel-label-item {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .wheel-label-item span {
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            transform-origin: bottom center;
+            display: inline-block;
+            width: 60px;
+        }
+
+        .wheel-center-knob {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #fef08a 0%, #eab308 60%, #854d0e 100%);
+            border: 3px solid #fef08a;
+            border-radius: 50%;
+            z-index: 25;
+            box-shadow: 0 0 10px rgba(0,0,0,0.6);
         }
 
         .controls {
@@ -303,7 +356,6 @@
             margin-bottom: 6px;
         }
 
-        /* Modal Styles for Withdrawal Locked */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -375,7 +427,6 @@
         </div>
     </div>
 
-    <!-- LIVE ANNOUNCEMENT BANNER -->
     <div class="announcement-bar">
         <div class="announcement-icon">📢</div>
         <div class="announcement-text">
@@ -383,12 +434,13 @@
         </div>
     </div>
 
-    <!-- ARCADE SPIN WHEEL CONTAINER -->
     <div class="game-container">
         <div class="wheel-outer-wrapper">
             <div class="pointer" id="wheelPointer"></div>
             <div class="arcade-frame" id="arcadeFrame"></div>
-            <svg id="luckySvg" class="svg-wheel" viewBox="0 0 300 300"></svg>
+            <div class="css-wheel" id="cssWheel"></div>
+            <div class="wheel-labels" id="wheelLabels"></div>
+            <div class="wheel-center-knob"></div>
         </div>
         <div class="controls">
             <button class="spin-btn" id="spinLuckyBtn" onclick="spinLuckyWheel()">Watch Ad & Spin</button>
@@ -397,7 +449,6 @@
     </div>
 
     <div class="extra-sections">
-        <!-- ANAYA COMMUNITY BONUS -->
         <div class="anaya-card" id="anayaCard" onclick="claimAnayaBonus()">
             <div class="anaya-info">
                 <div class="anaya-avatar">👩‍💼</div>
@@ -415,7 +466,6 @@
         </div>
     </div>
 
-    <!-- WITHDRAWAL LOCKED MODAL -->
     <div class="modal-overlay" id="withdrawModal">
         <div class="modal-content">
             <div class="lock-icon-large">🔒</div>
@@ -424,16 +474,13 @@
             <button class="modal-btn-close" onclick="closeWithdrawModal()">Understood</button>
         </div>
     </div>
-
-    <script>
+        <script>
         let wallet = 0;
         let lRotation = 0;
         let isSpinning = false;
         let anayaClaimed = false;
 
-        // Rewards matching the Casino Red & Gold Theme
         const rewards = ['JACKPOT', '100', 'LOSE', '500', '200', 'LOSE', '1000', '200', '500', 'LOSE'];
-        const colors = ['#dc2626', '#facc15', '#dc2626', '#facc15', '#dc2626', '#facc15', '#dc2626', '#facc15', '#dc2626', '#facc15'];
 
         const adController = window.Adsgram ? window.Adsgram.init({ blockId: "42288" }) : null;
 
@@ -460,52 +507,22 @@
             }
         }
 
-        function createSvgWheel() {
-            const svg = document.getElementById('luckySvg');
+        function createWheelLabels() {
+            const labelsContainer = document.getElementById('wheelLabels');
             const total = rewards.length;
             const sliceAngle = 360 / total;
-            const radius = 150;
-            const cx = 150, cy = 150;
-
             let html = '';
+
             rewards.forEach((item, index) => {
-                const startAngle = index * sliceAngle - 90;
-                const endAngle = startAngle + sliceAngle;
+                const angle = index * sliceAngle + sliceAngle / 2;
+                const textColor = (index % 2 === 0) ? '#ffffff' : '#7f1d1d';
                 
-                const x1 = cx + radius * Math.cos(Math.PI * startAngle / 180);
-                const y1 = cy + radius * Math.sin(Math.PI * startAngle / 180);
-                const x2 = cx + radius * Math.cos(Math.PI * endAngle / 180);
-                const y2 = cy + radius * Math.sin(Math.PI * endAngle / 180);
-
-                const pathData = `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2} Z`;
-                const fillColor = colors[index];
-                
-                const textAngle = startAngle + sliceAngle / 2;
-                const tx = cx + (radius - 40) * Math.cos(Math.PI * textAngle / 180);
-                const ty = cy + (radius - 40) * Math.sin(Math.PI * textAngle / 180);
-
-                // Alternating text color for contrast (White on Red slices, Dark Red on Yellow slices)
-                const textColor = (fillColor === '#dc2626') ? '#ffffff' : '#7f1d1d';
-
-                html += `<path d="${pathData}" fill="${fillColor}" stroke="#b91c1c" stroke-width="1.5"/>`;
-                
-                let fontSize = (item === 'JACKPOT' || item === '1000') ? '11' : '13';
-
-                html += `<text x="${tx}" y="${ty}" fill="${textColor}" font-size="${fontSize}" font-weight="bold" text-anchor="middle" dominant-baseline="middle" transform="rotate(${textAngle + 90}, ${tx}, ${ty})">${item}</text>`;
+                html += `<div class="wheel-label-item" style="transform: rotate(${angle}deg);">
+                            <span style="color: ${textColor};">${item}</span>
+                         </div>`;
             });
 
-            // Center Gold Knob
-            html += `<circle cx="${cx}" cy="${cy}" r="28" fill="url(#goldGradient)" stroke="#fef08a" stroke-width="3"/>`;
-            
-            html = `<defs>
-                        <radialGradient id="goldGradient" cx="50%" cy="50%" r="50%" fx="30%" fy="30%">
-                            <stop offset="0%" stop-color="#fef08a" />
-                            <stop offset="50%" stop-color="#eab308" />
-                            <stop offset="100%" stop-color="#854d0e" />
-                        </radialGradient>
-                    </defs>` + html;
-
-            svg.innerHTML = html;
+            labelsContainer.innerHTML = html;
         }
 
         async function spinLuckyWheel() {
@@ -534,11 +551,14 @@
             document.getElementById('luckyResult').style.color = '#facc15';
             document.getElementById('luckyResult').innerText = "Spinning...";
 
-            const svg = document.getElementById('luckySvg');
+            const wheel = document.getElementById('cssWheel');
+            const labels = document.getElementById('wheelLabels');
+            
             const extraSpins = 2160 + Math.floor(Math.random() * 720); 
             lRotation += extraSpins;
 
-            svg.style.transform = `rotate(${lRotation}deg)`;
+            wheel.style.transform = `rotate(${lRotation}deg)`;
+            labels.style.transform = `rotate(${lRotation}deg)`;
 
             setTimeout(() => {
                 const pointer = document.getElementById('wheelPointer');
@@ -563,11 +583,11 @@
             if(reward === 'LOSE') {
                 resDiv.style.color = '#ef4444';
                 resDiv.innerText = "❌ Better luck next time!";
-            } else if(reward === 'JACKPOT') {
+            } else if(reward === 'JACKPOT' || reward === '1000') {
                 wallet += 1000;
                 updateWalletDisplay();
                 resDiv.style.color = '#facc15';
-                resDiv.innerText = "🎉 JACKPOT! Won 1000 Points!";
+                resDiv.innerText = `🎉 AMAZING! Won ${reward} Points!`;
             } else {
                 const wonAmt = parseInt(reward);
                 wallet += wonAmt;
@@ -585,4 +605,25 @@
                 anayaClaimed = true;
                 updateWalletDisplay();
                 
-                const badge = do
+                const badge = document.getElementById('anayaBtnBadge');
+                badge.innerText = "Claimed ✅";
+                badge.classList.add('claimed');
+                document.getElementById('anayaCard').classList.add('disabled');
+                
+                alert("🎉 Mubarak ho! Anaya bonus 80 points aapke account mein add ho gaye hain!");
+            }
+        }
+
+        function openWithdrawModal() {
+            document.getElementById('withdrawModal').style.display = 'flex';
+        }
+
+        function closeWithdrawModal() {
+            document.getElementById('withdrawModal').style.display = 'none';
+        }
+
+        createBulbs();
+        createWheelLabels();
+    </script>
+</body>
+</html>
