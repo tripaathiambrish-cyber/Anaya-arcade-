@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anaya Arcade - Lucky Spin</title>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- Adsgram SDK Script -->
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <style>
@@ -93,90 +95,6 @@
             width: 100%;
         }
 
-        /* --- Anaya Bonus Card Styles --- */
-        .extra-sections {
-            width: 100%;
-            max-width: 500px;
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .anaya-card {
-            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-            padding: 15px 20px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
-            cursor: pointer;
-        }
-        .anaya-card.disabled {
-            opacity: 0.8;
-            cursor: default;
-        }
-        .anaya-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .anaya-avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-        }
-        .anaya-text h3 {
-            font-size: 16px;
-            color: #ffffff;
-        }
-        .chat-btn-icon {
-            background: #ffffff;
-            color: #6d28d9;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 12px;
-            white-space: nowrap;
-        }
-        .chat-btn-icon.claimed {
-            background: #10b981;
-            color: #ffffff;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="header-bar">
-        <h1>🎮 Anaya Arcade</h1>
-        <div class="header-right">
-            <div class="wallet-badge">
-                <span>🟡</span> <span id="walletBalance">0</span>
-            </div>
-            <button class="withdraw-top-btn" onclick="openWithdrawModal()">
-                <span>🔒</span> Withdraw
-            </button>
-        </div>
-    </div>
-
-    <!-- Anaya Bonus Section -->
-    <div class="extra-sections">
-        <div class="anaya-card" id="anayaCard" onclick="claimAnayaBonus()">
-            <div class="anaya-info">
-                <div class="anaya-avatar">👩‍💼</div>
-                <div class="anaya-text">
-                    <h3>Join Anaya Community</h3>
-                </div>
-            </div>
-            <div class="chat-btn-icon" id="anayaBtnBadge">Get 80 Points</div>
-        </div>
-    </div>
-        <style>
         .game-container {
             display: flex;
             flex-direction: column;
@@ -342,22 +260,62 @@
             min-height: 24px;
             text-align: center;
         }
-    </style>
 
-    <div class="game-container">
-        <div class="wheel-outer-wrapper">
-            <div class="pointer" id="wheelPointer"></div>
-            <div class="arcade-frame" id="arcadeFrame"></div>
-            <div class="css-wheel" id="cssWheel"></div>
-            <div class="wheel-labels" id="wheelLabels"></div>
-            <div class="wheel-center-knob"></div>
-        </div>
-        <div class="controls">
-            <button class="spin-btn" id="spinLuckyBtn" onclick="spinLuckyWheel()">Watch Ad & Spin</button>
-            <div class="result" id="luckyResult">Ad dekh kar free spin karein aur points jeetein!</div>
-        </div>
-    </div>
-        <style>
+        .extra-sections {
+            width: 100%;
+            max-width: 500px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .anaya-card {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            padding: 15px 20px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+            cursor: pointer;
+        }
+        .anaya-card.disabled {
+            opacity: 0.8;
+            cursor: default;
+        }
+        .anaya-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .anaya-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+        .anaya-text h3 {
+            font-size: 16px;
+            color: #ffffff;
+        }
+        .chat-btn-icon {
+            background: #ffffff;
+            color: #6d28d9;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .chat-btn-icon.claimed {
+            background: #10b981;
+            color: #ffffff;
+        }
+
         .terms-card {
             background: #0f172a;
             border: 1px solid #1e293b;
@@ -432,6 +390,52 @@
             margin-top: 5px;
         }
     </style>
+</head>
+<body>
+
+    <div class="header-bar">
+        <h1>🎮 Anaya Arcade</h1>
+        <div class="header-right">
+            <div class="wallet-badge">
+                <span>🟡</span> <span id="walletBalance">0</span>
+            </div>
+            <button class="withdraw-top-btn" onclick="openWithdrawModal()">
+                <span>🔒</span> Withdraw
+            </button>
+        </div>
+    </div>
+
+    <div class="announcement-bar">
+        <div class="announcement-text">
+            <span>⚠️ NOTICE: Withdrawal is currently LOCKED due to system maintenance.</span>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div class="wheel-outer-wrapper">
+            <div class="pointer" id="wheelPointer"></div>
+            <div class="arcade-frame" id="arcadeFrame"></div>
+            <div class="css-wheel" id="cssWheel"></div>
+            <div class="wheel-labels" id="wheelLabels"></div>
+            <div class="wheel-center-knob"></div>
+        </div>
+        <div class="controls">
+            <button class="spin-btn" id="spinLuckyBtn" onclick="spinLuckyWheel()">Watch Ad & Spin</button>
+            <div class="result" id="luckyResult">Ad dekh kar free spin karein aur points jeetein!</div>
+        </div>
+    </div>
+
+    <div class="extra-sections">
+        <div class="anaya-card" id="anayaCard" onclick="claimAnayaBonus()">
+            <div class="anaya-info">
+                <div class="anaya-avatar">👩‍💼</div>
+                <div class="anaya-text">
+                    <h3>Join Anaya Community</h3>
+                </div>
+            </div>
+            <div class="chat-btn-icon" id="anayaBtnBadge">Get 80 Points</div>
+        </div>
+    </div>
 
     <div class="terms-card">
         <h4>📜 Guidelines & Withdrawal</h4>
@@ -443,12 +447,18 @@
         <div class="modal-content">
             <div class="lock-icon-large">🔒</div>
             <h3>Withdrawal is Locked!</h3>
-            <p>Aapka withdrawal filhal system update aur maintenance ki wajah se <b>locked</b> hai. Jald hi ise enable kar diya jayega. Tab tak aap spins karke points collect karte rahein!</p>
+            <p>Aapka withdrawal filhal system update aur maintenance ki wajah से <b>locked</b> hai.</p>
             <button class="modal-btn-close" onclick="closeWithdrawModal()">Understood</button>
         </div>
     </div>
 
     <script>
+        // Telegram WebApp Initialization
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+        }
+
         let wallet = 0;
         let lRotation = 0;
         let isSpinning = false;
@@ -456,7 +466,6 @@
 
         const rewards = ['JACKPOT', '100', 'LOSE', '500', '200', 'LOSE', '1000', '200', '500', 'LOSE'];
 
-        // Updated with UnitID 42336
         const adController = window.Adsgram ? window.Adsgram.init({ blockId: "42336" }) : null;
 
         function updateWalletDisplay() {
@@ -524,7 +533,7 @@
             const btn = document.getElementById('spinLuckyBtn');
             btn.disabled = true;
             document.getElementById('luckyResult').style.color = '#facc15';
-            document.getElementById('luckyResult').innerText = "Spinning...";
+            document.getElementById('luckyResult'].innerText = "Spinning...";
 
             const wheel = document.getElementById('cssWheel');
             const labels = document.getElementById('wheelLabels');
@@ -603,6 +612,3 @@
 </body>
 </html>
 
-    
-    
-    
