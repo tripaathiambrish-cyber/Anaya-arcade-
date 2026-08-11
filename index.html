@@ -203,18 +203,19 @@
             width: 100%;
             height: 100%;
             text-align: center;
-            font-size: 12px;
-            font-weight: bold;
+            font-size: 11px;
+            font-weight: 900;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
         }
 
         .wheel-label-item span {
             position: absolute;
-            top: 18px;
+            top: 22px;
             left: 50%;
             transform: translateX(-50%);
             transform-origin: bottom center;
             display: inline-block;
-            width: 60px;
+            width: 50px;
         }
 
         .wheel-center-knob {
@@ -391,68 +392,7 @@
         }
     </style>
 </head>
-<body>
-
-    <div class="header-bar">
-        <h1>🎮 Anaya Arcade</h1>
-        <div class="header-right">
-            <div class="wallet-badge">
-                <span>🟡</span> <span id="walletBalance">0</span>
-            </div>
-            <button class="withdraw-top-btn" onclick="openWithdrawModal()">
-                <span>🔒</span> Withdraw
-            </button>
-        </div>
-    </div>
-
-    <div class="announcement-bar">
-        <div class="announcement-text">
-            <span>⚠️ NOTICE: Withdrawal is currently LOCKED due to system maintenance.</span>
-        </div>
-    </div>
-
-    <div class="game-container">
-        <div class="wheel-outer-wrapper">
-            <div class="pointer" id="wheelPointer"></div>
-            <div class="arcade-frame" id="arcadeFrame"></div>
-            <div class="css-wheel" id="cssWheel"></div>
-            <div class="wheel-labels" id="wheelLabels"></div>
-            <div class="wheel-center-knob"></div>
-        </div>
-        <div class="controls">
-            <button class="spin-btn" id="spinLuckyBtn" onclick="spinLuckyWheel()">Watch Ad & Spin</button>
-            <div class="result" id="luckyResult">Ad dekh kar free spin karein aur points jeetein!</div>
-        </div>
-    </div>
-
-    <div class="extra-sections">
-        <div class="anaya-card" id="anayaCard" onclick="claimAnayaBonus()">
-            <div class="anaya-info">
-                <div class="anaya-avatar">👩‍💼</div>
-                <div class="anaya-text">
-                    <h3>Join Anaya Community</h3>
-                </div>
-            </div>
-            <div class="chat-btn-icon" id="anayaBtnBadge">Get 80 Points</div>
-        </div>
-    </div>
-
-    <div class="terms-card">
-        <h4>📜 Guidelines & Withdrawal</h4>
-        <p>• Withdrawal Status: <span style="color: #ef4444; font-weight: bold;">LOCKED 🔒</span></p>
-        <p>• Watch the reward ad completely to successfully unlock your spin.</p>
-    </div>
-
-    <div class="modal-overlay" id="withdrawModal">
-        <div class="modal-content">
-            <div class="lock-icon-large">🔒</div>
-            <h3>Withdrawal is Locked!</h3>
-            <p>Aapka withdrawal filhal system update aur maintenance ki wajah से <b>locked</b> hai.</p>
-            <button class="modal-btn-close" onclick="closeWithdrawModal()">Understood</button>
-        </div>
-    </div>
-
-    <script>
+        <script>
         // Telegram WebApp Initialization
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
@@ -499,7 +439,7 @@
 
             rewards.forEach((item, index) => {
                 const angle = index * sliceAngle + sliceAngle / 2;
-                const textColor = (index % 2 === 0) ? '#ffffff' : '#7f1d1d';
+                const textColor = (index % 2 === 0) ? '#ffffff' : '#450a0a';
                 
                 html += `<div class="wheel-label-item" style="transform: rotate(${angle}deg);">
                             <span style="color: ${textColor};">${item}</span>
@@ -533,7 +473,7 @@
             const btn = document.getElementById('spinLuckyBtn');
             btn.disabled = true;
             document.getElementById('luckyResult').style.color = '#facc15';
-            document.getElementById('luckyResult'].innerText = "Spinning...";
+            document.getElementById('luckyResult').innerText = "Spinning...";
 
             const wheel = document.getElementById('cssWheel');
             const labels = document.getElementById('wheelLabels');
@@ -609,6 +549,4 @@
         createBulbs();
         createWheelLabels();
     </script>
-</body>
-</html>
-
+    
