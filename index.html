@@ -164,7 +164,7 @@
         </div>
     </div>
 
-    <!-- Anaya Bonus Section (Pehle part mein shamil) -->
+    <!-- Anaya Bonus Section -->
     <div class="extra-sections">
         <div class="anaya-card" id="anayaCard" onclick="claimAnayaBonus()">
             <div class="anaya-info">
@@ -175,7 +175,7 @@
             </div>
             <div class="chat-btn-icon" id="anayaBtnBadge">Get 80 Points</div>
         </div>
-    </div> 
+    </div>
         <style>
         .game-container {
             display: flex;
@@ -456,7 +456,8 @@
 
         const rewards = ['JACKPOT', '100', 'LOSE', '500', '200', 'LOSE', '1000', '200', '500', 'LOSE'];
 
-        const adController = window.Adsgram ? window.Adsgram.init({ blockId: "39666" }) : null;
+        // Updated with UnitID 42336
+        const adController = window.Adsgram ? window.Adsgram.init({ blockId: "42336" }) : null;
 
         function updateWalletDisplay() {
             document.getElementById('walletBalance').innerText = wallet;
@@ -602,4 +603,6 @@
 </body>
 </html>
 
+    
+    
     
