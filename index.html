@@ -474,7 +474,8 @@
             <button class="modal-btn-close" onclick="closeWithdrawModal()">Understood</button>
         </div>
     </div>
-        <script>
+
+    <script>
         let wallet = 0;
         let lRotation = 0;
         let isSpinning = false;
@@ -482,7 +483,7 @@
 
         const rewards = ['JACKPOT', '100', 'LOSE', '500', '200', 'LOSE', '1000', '200', '500', 'LOSE'];
 
-        const adController = window.Adsgram ? window.Adsgram.init({ blockId: "42288" }) : null;
+        const adController = window.Adsgram ? window.Adsgram.init({ blockId: "39666" }) : null;
 
         function updateWalletDisplay() {
             document.getElementById('walletBalance').innerText = wallet;
@@ -610,20 +611,4 @@
                 badge.classList.add('claimed');
                 document.getElementById('anayaCard').classList.add('disabled');
                 
-                alert("🎉 Mubarak ho! Anaya bonus 80 points aapke account mein add ho gaye hain!");
-            }
-        }
-
-        function openWithdrawModal() {
-            document.getElementById('withdrawModal').style.display = 'flex';
-        }
-
-        function closeWithdrawModal() {
-            document.getElementById('withdrawModal').style.display = 'none';
-        }
-
-        createBulbs();
-        createWheelLabels();
-    </script>
-</body>
-</html>
+                alert("🎉 Mubarak ho! Anaya bonus 80 points aapke account mein ad
