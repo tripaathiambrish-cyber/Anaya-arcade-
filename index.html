@@ -375,7 +375,7 @@
             margin-top: 5px;
         }
     </style>
-        </head>
+</head>
     <body>
 
     <div class="header-bar">
@@ -450,7 +450,8 @@
 
         const rewards = ['JACKPOT', '100', 'LOSE', '500', '200', 'LOSE', '1000', '200', '500', 'LOSE'];
 
-        const adController = window.Adsgram ? window.Adsgram.init({ blockId: "42336" }) : null;
+        // Updated with new Block ID 42380
+        const adController = window.Adsgram ? window.Adsgram.init({ blockId: "42380" }) : null;
 
         function updateWalletDisplay() {
             document.getElementById('walletBalance').innerText = wallet;
@@ -596,4 +597,3 @@
 </body>
 </html>
 
-        
