@@ -150,7 +150,7 @@
             height: 0;
             border-left: 14px solid transparent;
             border-right: 14px solid transparent;
-            border-top: 26px solid #38bdf8;
+            border-top: 26px solid #facc15;
             z-index: 20;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.8));
             transform-origin: 50% 0%;
@@ -165,13 +165,15 @@
             animation: tickBounce 0.15s ease-in-out;
         }
 
+        /* Casino Gold / Red Frame with Glow */
         .arcade-frame {
             position: absolute;
             width: 310px;
             height: 310px;
             border-radius: 50%;
-            border: 12px solid #2563eb;
-            box-shadow: 0 0 25px rgba(37, 99, 235, 0.6), inset 0 0 15px rgba(0,0,0,0.8);
+            background: radial-gradient(circle, #7f1d1d 0%, #450a0a 100%);
+            border: 10px solid #eab308;
+            box-shadow: 0 0 30px rgba(234, 179, 8, 0.7), inset 0 0 15px rgba(0,0,0,0.9);
             z-index: 10;
             pointer-events: none;
         }
@@ -180,9 +182,9 @@
             position: absolute;
             width: 8px;
             height: 8px;
-            background-color: #93c5fd;
+            background-color: #fef08a;
             border-radius: 50%;
-            box-shadow: 0 0 8px #60a5fa;
+            box-shadow: 0 0 8px #facc15, 0 0 12px #eab308;
             transform: translate(-50%, -50%);
         }
 
@@ -203,8 +205,8 @@
             margin-top: 10px;
         }
         .spin-btn {
-            background: linear-gradient(135deg, #0284c7, #0369a1);
-            color: white;
+            background: linear-gradient(135deg, #eab308, #ca8a04);
+            color: #450a0a;
             border: none;
             padding: 14px 35px;
             font-size: 18px;
@@ -212,18 +214,19 @@
             border-radius: 30px;
             cursor: pointer;
             width: 100%;
-            box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
+            box-shadow: 0 4px 15px rgba(234, 179, 8, 0.4);
             transition: transform 0.2s;
         }
         .spin-btn:disabled {
             background: #64748b;
+            color: #ffffff;
             cursor: not-allowed;
             box-shadow: none;
         }
         .result {
             font-size: 15px;
             font-weight: bold;
-            color: #38bdf8;
+            color: #facc15;
             min-height: 24px;
             text-align: center;
         }
@@ -428,8 +431,9 @@
         let isSpinning = false;
         let anayaClaimed = false;
 
-        const rewards = ['BONUS', '10', '20', 'TRY AGAIN', '50', '100', '10', '20', 'TRY AGAIN', '50'];
-        const colors = ['#1d4ed8', '#3b82f6', '#1d4ed8', '#3b82f6', '#1d4ed8', '#3b82f6', '#1d4ed8', '#3b82f6', '#1d4ed8', '#3b82f6'];
+        // Rewards matching the Casino Red & Gold Theme
+        const rewards = ['JACKPOT', '100', 'LOSE', '500', '200', 'LOSE', '1000', '200', '500', 'LOSE'];
+        const colors = ['#dc2626', '#facc15', '#dc2626', '#facc15', '#dc2626', '#facc15', '#dc2626', '#facc15', '#dc2626', '#facc15'];
 
         const adController = window.Adsgram ? window.Adsgram.init({ blockId: "42288" }) : null;
 
@@ -477,24 +481,27 @@
                 const fillColor = colors[index];
                 
                 const textAngle = startAngle + sliceAngle / 2;
-                const tx = cx + (radius - 35) * Math.cos(Math.PI * textAngle / 180);
-                const ty = cy + (radius - 35) * Math.sin(Math.PI * textAngle / 180);
+                const tx = cx + (radius - 40) * Math.cos(Math.PI * textAngle / 180);
+                const ty = cy + (radius - 40) * Math.sin(Math.PI * textAngle / 180);
 
-                html += `<path d="${pathData}" fill="${fillColor}" stroke="#bfdbfe" stroke-width="2"/>`;
+                // Alternating text color for contrast (White on Red slices, Dark Red on Yellow slices)
+                const textColor = (fillColor === '#dc2626') ? '#ffffff' : '#7f1d1d';
+
+                html += `<path d="${pathData}" fill="${fillColor}" stroke="#b91c1c" stroke-width="1.5"/>`;
                 
-                let isBonus = item === 'BONUS';
-                let fontSize = isBonus ? '11' : '12';
+                let fontSize = (item === 'JACKPOT' || item === '1000') ? '11' : '13';
 
-                html += `<text x="${tx}" y="${ty}" fill="#ffffff" font-size="${fontSize}" font-weight="bold" text-anchor="middle" dominant-baseline="middle" transform="rotate(${textAngle + 90}, ${tx}, ${ty})">${item}</text>`;
+                html += `<text x="${tx}" y="${ty}" fill="${textColor}" font-size="${fontSize}" font-weight="bold" text-anchor="middle" dominant-baseline="middle" transform="rotate(${textAngle + 90}, ${tx}, ${ty})">${item}</text>`;
             });
 
-            html += `<circle cx="${cx}" cy="${cy}" r="30" fill="url(#metalGradient)" stroke="#60a5fa" stroke-width="3"/>`;
+            // Center Gold Knob
+            html += `<circle cx="${cx}" cy="${cy}" r="28" fill="url(#goldGradient)" stroke="#fef08a" stroke-width="3"/>`;
             
             html = `<defs>
-                        <radialGradient id="metalGradient" cx="50%" cy="50%" r="50%" fx="30%" fy="30%">
-                            <stop offset="0%" stop-color="#93c5fd" />
-                            <stop offset="50%" stop-color="#2563eb" />
-                            <stop offset="100%" stop-color="#1e3a8a" />
+                        <radialGradient id="goldGradient" cx="50%" cy="50%" r="50%" fx="30%" fy="30%">
+                            <stop offset="0%" stop-color="#fef08a" />
+                            <stop offset="50%" stop-color="#eab308" />
+                            <stop offset="100%" stop-color="#854d0e" />
                         </radialGradient>
                     </defs>` + html;
 
@@ -506,7 +513,7 @@
 
             if (adController) {
                 try {
-                    document.getElementById('luckyResult').style.color = '#38bdf8';
+                    document.getElementById('luckyResult').style.color = '#facc15';
                     document.getElementById('luckyResult').innerText = "Loading Ad...";
                     await adController.show();
                     executeSpin();
@@ -524,7 +531,7 @@
             isSpinning = true;
             const btn = document.getElementById('spinLuckyBtn');
             btn.disabled = true;
-            document.getElementById('luckyResult').style.color = '#38bdf8';
+            document.getElementById('luckyResult').style.color = '#facc15';
             document.getElementById('luckyResult').innerText = "Spinning...";
 
             const svg = document.getElementById('luckySvg');
@@ -553,14 +560,14 @@
             const reward = rewards[winningIndex];
 
             const resDiv = document.getElementById('luckyResult');
-            if(reward === 'TRY AGAIN') {
+            if(reward === 'LOSE') {
                 resDiv.style.color = '#ef4444';
                 resDiv.innerText = "❌ Better luck next time!";
-            } else if(reward === 'BONUS') {
-                wallet += 500;
+            } else if(reward === 'JACKPOT') {
+                wallet += 1000;
                 updateWalletDisplay();
-                resDiv.style.color = '#38bdf8';
-                resDiv.innerText = "🎉 AMAZING! Won 500 Bonus Points!";
+                resDiv.style.color = '#facc15';
+                resDiv.innerText = "🎉 JACKPOT! Won 1000 Points!";
             } else {
                 const wonAmt = parseInt(reward);
                 wallet += wonAmt;
@@ -578,14 +585,4 @@
                 anayaClaimed = true;
                 updateWalletDisplay();
                 
-                const badge = document.getElementById('anayaBtnBadge');
-                badge.innerText = "Claimed ✅";
-                badge.classList.add('claimed');
-                document.getElementById('anayaCard').classList.add('disabled');
-                
-                alert("🎉 Mubarak ho! Anaya bonus 80 points aapke account mein add ho gaye hain!");
-            }
-        }
-
-        function openWithdrawModal() {
-            document.getElementById
+                const badge = do
