@@ -25,7 +25,7 @@
 
     <div class="announcement-bar">
         <div class="announcement-text">
-            <span>✅ Withdrawal Status: ACTIVE (Min 500 Points)</span>
+            <span>✅ Withdrawal Status: ACTIVE (Min 10000 Points)</span>
         </div>
     </div>
 
@@ -76,8 +76,8 @@
             </div>
 
             <div class="form-group">
-                <label>Points Amount (Min 500 Points)</label>
-                <input type="number" id="wAmount" placeholder="e.g. 500">
+                <label>Points Amount (Min 10000 Points)</label>
+                <input type="number" id="wAmount" placeholder="e.g. 10000">
             </div>
 
             <div class="form-group">
@@ -652,8 +652,8 @@
         const amount = parseInt(document.getElementById('wAmount').value);
         const details = document.getElementById('wDetails').value.trim();
 
-        if (!amount || amount < 500) {
-            alert("❌ Minimum withdrawal amount 500 points hai!");
+        if (!amount || amount < 10000) {
+            alert("❌ Minimum withdrawal amount 10000 points hai!");
             return;
         }
         if (amount > wallet) {
@@ -690,5 +690,5 @@
 
     createBulbs();
     createWheelLabels();
-</script>
+    </script>
 
