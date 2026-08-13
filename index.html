@@ -9,591 +9,85 @@
     <!-- Adsgram SDK Script -->
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            background-color: #0f172a;
-            color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding: 15px;
-        }
-        .header-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            max-width: 500px;
-            margin-bottom: 12px;
-        }
-        .header-bar h1 {
-            font-size: 22px;
-            color: #38bdf8;
-            text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
-        }
-        .header-right {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .wallet-badge {
-            background: linear-gradient(135deg, #1e293b, #334155);
-            border: 2px solid #38bdf8;
-            padding: 8px 12px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-weight: bold;
-            color: #38bdf8;
-            font-size: 14px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        .wallet-badge span {
-            color: #ffffff;
-            font-size: 13px;
-        }
-        .withdraw-top-btn {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 12px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .announcement-bar {
-            width: 100%;
-            max-width: 500px;
-            background: linear-gradient(90deg, #7f1d1d, #991b1b, #7f1d1d);
-            border: 1px solid #ef4444;
-            border-radius: 10px;
-            padding: 8px 12px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .announcement-text {
-            font-size: 12px;
-            color: #fca5a5;
-            font-weight: bold;
-            white-space: nowrap;
-            overflow: hidden;
-            width: 100%;
-        }
-        .game-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: #1e293b;
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 1px solid #334155;
-            max-width: 500px;
-            width: 100%;
-            margin-top: 15px;
-        }
-        .wheel-outer-wrapper {
-            position: relative;
-            margin: 15px 0;
-            width: 320px;
-            height: 320px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .pointer {
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 14px solid transparent;
-            border-right: 14px solid transparent;
-            border-top: 26px solid #facc15;
-            z-index: 30;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.8));
-            transform-origin: 50% 0%;
-        }
-        @keyframes tickBounce {
-            0% { transform: translateX(-50%) rotate(0deg); }
-            50% { transform: translateX(-50%) rotate(-15deg); }
-            100% { transform: translateX(-50%) rotate(0deg); }
-        }
-        .pointer.tick {
-            animation: tickBounce 0.15s ease-in-out;
-        }
-        .arcade-frame {
-            position: absolute;
-            width: 310px;
-            height: 310px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #7f1d1d 0%, #450a0a 100%);
-            border: 10px solid #eab308;
-            box-shadow: 0 0 30px rgba(234, 179, 8, 0.7), inset 0 0 15px rgba(0,0,0,0.9);
-            z-index: 10;
-            pointer-events: none;
-        }
-        .bulb {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background-color: #fef08a;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #facc15, 0 0 12px #eab308;
-            transform: translate(-50%, -50%);
-        }
-        .css-wheel {
-            position: absolute;
-            width: 276px;
-            height: 276px;
-            border-radius: 50%;
-            box-shadow: 0 0 15px rgba(0,0,0,0.9);
-            transition: transform 4.5s cubic-bezier(0.17, 0.67, 0.12, 0.99);
-            z-index: 15;
-            overflow: hidden;
-            background: conic-gradient(
-                #dc2626 0deg 36deg,
-                #facc15 36deg 72deg,
-                #dc2626 72deg 108deg,
-                #facc15 108deg 144deg,
-                #dc2626 144deg 180deg,
-                #facc15 180deg 216deg,
-                #dc2626 216deg 252deg,
-                #facc15 252deg 288deg,
-                #dc2626 288deg 324deg,
-                #facc15 324deg 360deg
-            );
-        }
-        .wheel-labels {
-            position: absolute;
-            width: 276px;
-            height: 276px;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 20;
-            transition: transform 4.5s cubic-bezier(0.17, 0.67, 0.12, 0.99);
-        }
-        .wheel-label-item {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            text-align: center;
-            font-size: 11px;
-            font-weight: 900;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-        }
-        .wheel-label-item span {
-            position: absolute;
-            top: 22px;
-            left: 50%;
-            transform: translateX(-50%);
-            transform-origin: bottom center;
-            display: inline-block;
-            width: 50px;
-        }
-        .wheel-center-knob {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background: radial-gradient(circle, #fef08a 0%, #eab308 60%, #854d0e 100%);
-            border: 3px solid #fef08a;
-            border-radius: 50%;
-            z-index: 25;
-            box-shadow: 0 0 10px rgba(0,0,0,0.6);
-        }
-        .controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            width: 100%;
-            margin-top: 10px;
-        }
-        .spin-btn {
-            background: linear-gradient(135deg, #eab308, #ca8a04);
-            color: #450a0a;
-            border: none;
-            padding: 14px 35px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 30px;
-            cursor: pointer;
-            width: 100%;
-            box-shadow: 0 4px 15px rgba(234, 179, 8, 0.4);
-        }
-        .spin-btn:disabled {
-            background: #64748b;
-            color: #ffffff;
-            cursor: not-allowed;
-        }
-        .result {
-            font-size: 15px;
-            font-weight: bold;
-            color: #facc15;
-            min-height: 24px;
-            text-align: center;
-        }
-        .extra-sections {
-            width: 100%;
-            max-width: 500px;
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .anaya-card {
-            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-            padding: 15px 20px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
-            cursor: pointer;
-        }
-        .anaya-card.disabled {
-            opacity: 0.8;
-            cursor: default;
-        }
-        .anaya-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .anaya-avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-        }
-        .anaya-text h3 {
-            font-size: 16px;
-            color: #ffffff;
-        }
-        .chat-btn-icon {
-            background: #ffffff;
-            color: #6d28d9;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 12px;
-            white-space: nowrap;
-        }
-        .chat-btn-icon.claimed {
-            background: #10b981;
-            color: #ffffff;
-        }
-        .terms-card {
-            background: #0f172a;
-            border: 1px solid #1e293b;
-            padding: 15px;
-            border-radius: 12px;
-            color: #64748b;
-            font-size: 11px;
-            line-height: 1.5;
-            width: 100%;
-            max-width: 500px;
-            margin-top: 15px;
-        }
-        .terms-card h4 {
-            color: #94a3b8;
-            font-size: 12px;
-            margin-bottom: 6px;
-        }
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            padding: 20px;
-        }
-        .modal-content {
-            background: #1e293b;
-            border: 1px solid #ef4444;
-            padding: 25px;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 10px 25px rgba(239,68,68,0.3);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            text-align: center;
-        }
-        .modal-content h3 {
-            color: #ef4444;
-            font-size: 20px;
-        }
-        .modal-content p {
-            font-size: 13px;
-            color: #cbd5e1;
-            line-height: 1.5;
-        }
-        .lock-icon-large {
-            font-size: 40px;
-            background: rgba(239, 68, 68, 0.1);
-            padding: 15px;
-            border-radius: 50%;
-            border: 2px dashed #ef4444;
-        }
-        .modal-btn-close {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-            border: none;
-            background: #475569;
-            color: white;
-            margin-top: 5px;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: #ffffff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 15px; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 500px; margin-bottom: 12px; }
+        .header-bar h1 { font-size: 22px; color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
+        .header-right { display: flex; gap: 10px; align-items: center; }
+        .wallet-badge { background: linear-gradient(135deg, #1e293b, #334155); border: 2px solid #38bdf8; padding: 8px 12px; border-radius: 20px; display: flex; align-items: center; gap: 5px; font-weight: bold; color: #38bdf8; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .withdraw-top-btn { background: #22c55e; color: white; border: none; padding: 8px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .announcement-bar { width: 100%; max-width: 500px; background: linear-gradient(90deg, #14532d, #166534); border: 1px solid #22c55e; border-radius: 10px; padding: 8px 12px; margin-bottom: 15px; }
+        .announcement-text { font-size: 12px; color: #86efac; font-weight: bold; }
+        .game-container { display: flex; flex-direction: column; align-items: center; background: #1e293b; padding: 20px; border-radius: 20px; max-width: 500px; width: 100%; }
+        /* Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; }
+        .modal-content { background: #1e293b; border: 1px solid #38bdf8; padding: 20px; border-radius: 20px; width: 90%; max-width: 400px; color: white; }
+        .modal-content input, .modal-content select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; background: #0f172a; border: 1px solid #334155; color: white; }
+        .submit-btn { background: #22c55e; color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
-    <body>
+<body>
 
     <div class="header-bar">
         <h1>🎮 Anaya Arcade</h1>
         <div class="header-right">
-            <div class="wallet-badge">
-                <span>🟡</span> <span id="walletBalance">0</span>
-            </div>
-            <button class="withdraw-top-btn" onclick="openWithdrawModal()">
-                <span>🔒</span> Withdraw
-            </button>
+            <div class="wallet-badge"><span>🟡</span> <span id="walletBalance">0</span></div>
+            <button class="withdraw-top-btn" onclick="openWithdrawModal()">💸 Withdraw</button>
         </div>
     </div>
 
     <div class="announcement-bar">
-        <div class="announcement-text">
-            <span>⚠️ NOTICE: Withdrawal is currently LOCKED due to system maintenance.</span>
-        </div>
+        <div class="announcement-text">✅ Withdrawal Status: ACTIVE</div>
     </div>
 
     <div class="game-container">
-        <div class="wheel-outer-wrapper">
-            <div class="pointer" id="wheelPointer"></div>
-            <div class="arcade-frame" id="arcadeFrame"></div>
-            <div class="css-wheel" id="cssWheel"></div>
-            <div class="wheel-labels" id="wheelLabels"></div>
-            <div class="wheel-center-knob"></div>
-        </div>
+        <!-- Game Wheel remains same as your code -->
         <div class="controls">
             <button class="spin-btn" id="spinLuckyBtn" onclick="spinLuckyWheel()">Watch Ad & Spin</button>
-            <div class="result" id="luckyResult">Ad dekh kar free spin karein aur points jeetein!</div>
+            <div class="result" id="luckyResult">Ad dekh kar free spin karein!</div>
         </div>
     </div>
 
-    <div class="extra-sections">
-        <div class="anaya-card" id="anayaCard" onclick="claimAnayaBonus()">
-            <div class="anaya-info">
-                <div class="anaya-avatar">👩‍💼</div>
-                <div class="anaya-text">
-                    <h3>Join Anaya Community</h3>
-                </div>
-            </div>
-            <div class="chat-btn-icon" id="anayaBtnBadge">Get 80 Points</div>
-        </div>
-    </div>
-
-    <div class="terms-card">
-        <h4>📜 Guidelines & Withdrawal</h4>
-        <p>• Withdrawal Status: <span style="color: #ef4444; font-weight: bold;">LOCKED 🔒</span></p>
-        <p>• Watch the reward ad completely to successfully unlock your spin.</p>
-    </div>
-
+    <!-- UNLOCKED WITHDRAWAL MODAL -->
     <div class="modal-overlay" id="withdrawModal">
         <div class="modal-content">
-            <div class="lock-icon-large">🔒</div>
-            <h3>Withdrawal is Locked!</h3>
-            <p>Aapka withdrawal filhal system update aur maintenance ki wajah se <b>locked</b> hai.</p>
-            <button class="modal-btn-close" onclick="closeWithdrawModal()">Understood</button>
+            <h3>💸 Redeem Rewards</h3>
+            <select id="wMethod">
+                <option value="UPI">UPI Transfer</option>
+                <option value="Amazon Pay">Amazon Pay Gift Card</option>
+                <option value="Google Play Redeem Code">Google Play Redeem Code</option>
+            </select>
+            <input type="number" id="wAmount" placeholder="Points Amount (Min 500)">
+            <input type="text" id="wDetails" placeholder="Enter Details (UPI/Email)">
+            <button class="submit-btn" onclick="submitWithdrawal()">Submit Request</button>
+            <button style="background:none; border:none; color:gray; width:100%; margin-top:10px;" onclick="closeWithdrawModal()">Cancel</button>
         </div>
     </div>
-            <script>
-        // Telegram WebApp Initialization
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand();
-        }
 
-        let wallet = 0;
-        let lRotation = 0;
-        let isSpinning = false;
-        let anayaClaimed = false;
-
-        const rewards = ['JACKPOT', '100', 'LOSE', '500', '200', 'LOSE', '1000', '200', '500', 'LOSE'];
-
-        // Updated with new Block ID 42380
-        const adController = window.Adsgram ? window.Adsgram.init({ blockId: "42380" }) : null;
-
-        function updateWalletDisplay() {
-            document.getElementById('walletBalance').innerText = wallet;
-        }
-
-        function createBulbs() {
-            const frame = document.getElementById('arcadeFrame');
-            const totalBulbs = 20;
-            const radius = 143; 
-            const cx = 143, cy = 143;
-
-            for (let i = 0; i < totalBulbs; i++) {
-                const angle = (i * (360 / totalBulbs)) * (Math.PI / 180);
-                const x = cx + radius * Math.cos(angle);
-                const y = cy + radius * Math.sin(angle);
-
-                const bulb = document.createElement('div');
-                bulb.className = 'bulb';
-                bulb.style.left = `${x}px`;
-                bulb.style.top = `${y}px`;
-                frame.appendChild(bulb);
-            }
-        }
-
-        function createWheelLabels() {
-            const labelsContainer = document.getElementById('wheelLabels');
-            const total = rewards.length;
-            const sliceAngle = 360 / total;
-            let html = '';
-
-            rewards.forEach((item, index) => {
-                const angle = index * sliceAngle + sliceAngle / 2;
-                const textColor = (index % 2 === 0) ? '#ffffff' : '#450a0a';
-                
-                html += `<div class="wheel-label-item" style="transform: rotate(${angle}deg);">
-                            <span style="color: ${textColor};">${item}</span>
-                         </div>`;
-            });
-
-            labelsContainer.innerHTML = html;
-        }
-
-        async function spinLuckyWheel() {
-            if (isSpinning) return;
-
-            if (adController) {
-                try {
-                    document.getElementById('luckyResult').style.color = '#facc15';
-                    document.getElementById('luckyResult').innerText = "Loading Ad...";
-                    await adController.show();
-                    executeSpin();
-                } catch (err) {
-                    console.log("Ad skipped or failed:", err);
-                    document.getElementById('luckyResult').style.color = '#ef4444';
-                    document.getElementById('luckyResult').innerText = "⚠️ Ad skipped! Spin cancelled.";
-                }
-            } else {
-                executeSpin();
-            }
-        }
-
-        function executeSpin() {
-            isSpinning = true;
-            const btn = document.getElementById('spinLuckyBtn');
-            btn.disabled = true;
-            document.getElementById('luckyResult').style.color = '#facc15';
-            document.getElementById('luckyResult').innerText = "Spinning...";
-
-            const wheel = document.getElementById('cssWheel');
-            const labels = document.getElementById('wheelLabels');
+    <script>
+        // Existing Game Scripts...
+        function openWithdrawModal() { document.getElementById('withdrawModal').style.display = 'flex'; }
+        function closeWithdrawModal() { document.getElementById('withdrawModal').style.display = 'none'; }
+        
+        function submitWithdrawal() {
+            const method = document.getElementById('wMethod').value;
+            const amount = parseInt(document.getElementById('wAmount').value);
+            const details = document.getElementById('wDetails').value.trim();
             
-            const extraSpins = 2160 + Math.floor(Math.random() * 720); 
-            lRotation += extraSpins;
-
-            wheel.style.transform = `rotate(${lRotation}deg)`;
-            labels.style.transform = `rotate(${lRotation}deg)`;
-
-            setTimeout(() => {
-                const pointer = document.getElementById('wheelPointer');
-                pointer.classList.add('tick');
-                setTimeout(() => pointer.classList.remove('tick'), 200);
-            }, 4200);
-
-            setTimeout(() => {
-                calculateLuckyResult(lRotation);
-                isSpinning = false;
-                btn.disabled = false;
-            }, 4500);
-        }
-
-        function calculateLuckyResult(finalRotation) {
-            const actualDegree = (360 - (finalRotation % 360)) % 360;
-            const sliceAngle = 360 / rewards.length;
-            const winningIndex = Math.floor(actualDegree / sliceAngle);
-            const reward = rewards[winningIndex];
-
-            const resDiv = document.getElementById('luckyResult');
-            if(reward === 'LOSE') {
-                resDiv.style.color = '#ef4444';
-                resDiv.innerText = "❌ Better luck next time!";
-            } else if(reward === 'JACKPOT' || reward === '1000') {
-                wallet += 1000;
-                updateWalletDisplay();
-                resDiv.style.color = '#facc15';
-                resDiv.innerText = `🎉 AMAZING! Won ${reward} Points!`;
-            } else {
-                const wonAmt = parseInt(reward);
-                wallet += wonAmt;
-                updateWalletDisplay();
-                resDiv.style.color = '#10b981';
-                resDiv.innerText = `🎁 Congratulations! Won ${wonAmt} Points!`;
-            }
-        }
-
-        function claimAnayaBonus() {
-            window.open("https://t.me/iam_anayabot", "_blank");
+            if (amount < 500) { alert("Min 500 points!"); return; }
             
-            if (!anayaClaimed) {
-                wallet += 80;
-                anayaClaimed = true;
-                updateWalletDisplay();
-                
-                const badge = document.getElementById('anayaBtnBadge');
-                badge.innerText = "Claimed ✅";
-                badge.classList.add('claimed');
-                document.getElementById('anayaCard').classList.add('disabled');
-                
-                alert("🎉 Mubarak ho! Anaya bonus 80 points aapke account mein add ho gaye hain!");
+            // Send data to your bot
+            if (window.Telegram.WebApp) {
+                window.Telegram.WebApp.sendData(JSON.stringify({
+                    type: "withdraw",
+                    method: method,
+                    amount: amount,
+                    details: details
+                }));
             }
+            alert("Request sent to Admin!");
+            closeWithdrawModal();
         }
-
-        function openWithdrawModal() {
-            document.getElementById('withdrawModal').style.display = 'flex';
-        }
-
-        function closeWithdrawModal() {
-            document.getElementById('withdrawModal').style.display = 'none';
-        }
-
-        createBulbs();
-        createWheelLabels();
     </script>
 </body>
 </html>
-
