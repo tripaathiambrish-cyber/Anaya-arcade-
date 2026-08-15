@@ -27,7 +27,6 @@
         .main-btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
         .spin-btn { background: linear-gradient(180deg, #ff4500, #8b0000); color: #fff; border: 1px solid #ffd700; }
         .withdraw-btn { background: linear-gradient(180deg, #2ed573, #1e90ff); color: #fff; }
-        .admin-panel-btn { background: rgba(255, 215, 0, 0.15); color: #ffd700; border: 1px dashed #ffd700; padding: 6px; font-size: 11px; }
 
         /* History */
         .history-card { width: 100%; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 12px; padding: 10px; }
@@ -44,7 +43,6 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99; justify-content: center; align-items: center; }
         .modal-content { background: #1a0507; border: 2px solid #ffd700; padding: 15px; border-radius: 14px; width: 90%; max-width: 340px; text-align: center; }
         .modal select, .modal input { width: 100%; padding: 8px; margin: 5px 0; border-radius: 6px; border: 1px solid rgba(255,215,0,0.3); background: #2a0a0d; color: #fff; }
-        .action-mini-btn { padding: 4px 8px; font-size: 10px; border-radius: 4px; border: none; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -53,8 +51,6 @@
         <div class="user-info" id="username">Player</div>
         <div class="balance-card">🪙 <span id="balance">0</span></div>
     </div>
-
-    <button class="main-btn admin-panel-btn" onclick="openAdminPanel()">👑 Admin Mode</button>
 
     <div class="wheel-container">
         <div class="pointer"></div>
@@ -92,21 +88,11 @@
         </div>
     </div>
 
-    <!-- Admin Panel Modal -->
-    <div class="modal" id="adminModal">
-        <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
-            <h3 style="color:#ffd700; font-size: 15px;">👑 Admin Approvals (Cloud Realtime)</h3>
-            <div id="adminRequestList" style="display:flex; flex-direction:column; gap:8px; margin: 10px 0;"></div>
-            <button class="main-btn" style="background:#444; color:#fff;" onclick="closeAdminPanel()">Close Admin</button>
-        </div>
-    </div>
-
     <!-- Firebase SDK (v9/v10 Modular) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyDaP1bkkFocKMgftJgEI6KdMSzWIbf3eYg",
             authDomain: "anaya-arcade.firebaseapp.com",
@@ -127,7 +113,7 @@
         const userName = tg?.initDataUnsafe?.user?.first_name || "Player";
         document.getElementById('username').innerText = userName;
 
-        let coins = parseInt(localStorage.getItem('user_coins')) || 100;
+        let coins = parseInt(localStorage.getItem('user_coins')) || 0;
         document.getElementById('balance').innerText = coins;
 
         window.updateBalance = function(newCoins) {
@@ -136,7 +122,6 @@
             document.getElementById('balance').innerText = coins;
         };
 
-        // Realtime Firestore Listener for History
         const withdrawRef = collection(db, "withdrawals");
         
         onSnapshot(withdrawRef, (snapshot) => {
@@ -170,7 +155,6 @@
             });
         });
 
-        // Submit Withdrawal to Cloud Firestore
         window.processWithdrawal = async function() {
             const method = document.getElementById('withdrawMethod').value;
             const address = document.getElementById('userAddress').value.trim();
@@ -198,63 +182,10 @@
                 alert("Error sending request to Firebase database.");
             }
         };
-
-        // Admin Approval Realtime Render
-        window.renderAdminList = function() {
-            onSnapshot(withdrawRef, (snapshot) => {
-                const list = document.getElementById('adminRequestList');
-                list.innerHTML = '';
-                
-                let pendingItems = [];
-                snapshot.forEach(docSnap => {
-                    let data = docSnap.data();
-                    if(data.status === 'Pending') {
-                        pendingItems.push({ id: docSnap.id, ...data });
-                    }
-                });
-
-                if (pendingItems.length === 0) {
-                    list.innerHTML = '<div style="font-size:11px; color:#aaa;">No pending requests right now.</div>';
-                    return;
-                }
-
-                pendingItems.forEach(item => {
-                    list.innerHTML += `
-                        <div style="background:rgba(255,255,255,0.08); padding:8px; border-radius:6px; font-size:11px; text-align:left;">
-                            <div><b>User:</b> ${item.userName} (ID: ${item.userId})</div>
-                            <div><b>Amount:</b> ${item.amount} Coins</div>
-                            <div><b>Details:</b> ${item.method} - ${item.address}</div>
-                            <div style="margin-top:6px; display:flex; gap:5px;">
-                                <button class="action-mini-btn" style="background:#2ed573; color:#000;" onclick="updateFirebaseStatus('${item.id}', 'Successful', ${item.amount})">Approve</button>
-                                <button class="action-mini-btn" style="background:#ff4757; color:#fff;" onclick="updateFirebaseStatus('${item.id}', 'Failed', ${item.amount})">Reject</button>
-                            </div>
-                        </div>
-                    `;
-                });
-            });
-        };
-
-        // Update Status in Firestore
-        window.updateFirebaseStatus = async function(docId, newStatus, reqAmount) {
-            try {
-                const docToUpdate = doc(db, "withdrawals", docId);
-                await updateDoc(docToUpdate, { status: newStatus });
-                
-                if(newStatus === 'Failed') {
-                    alert("Request rejected.");
-                } else {
-                    alert("Request approved successfully!");
-                }
-            } catch(e) {
-                alert("Database Update Failed!");
-            }
-        };
     </script>
 
     <script>
-        // Non-module Adsgram & Spin Logic
         const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "39716" }) : null;
-        const ADMIN_PIN = "1234"; 
 
         const canvas = document.getElementById("canvas");
         const ctx = canvas.getContext("2d");
@@ -319,18 +250,6 @@
 
         function openWithdraw() { document.getElementById('withdrawModal').style.display = 'flex'; }
         function closeWithdraw() { document.getElementById('withdrawModal').style.display = 'none'; }
-        
-        function openAdminPanel() {
-            let pin = prompt("Enter Admin Secret PIN:");
-            if (pin === ADMIN_PIN) {
-                if(window.renderAdminList) window.renderAdminList();
-                document.getElementById('adminModal').style.display = 'flex';
-            } else if(pin !== null) {
-                alert("Incorrect PIN Code!");
-            }
-        }
-        function closeAdminPanel() { document.getElementById('adminModal').style.display = 'none'; }
     </script>
 </body>
-  </html>
-  
+</html>
