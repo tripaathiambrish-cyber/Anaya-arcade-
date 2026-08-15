@@ -13,6 +13,11 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; user-select: none; }
         body { background: radial-gradient(circle, #3a0007 0%, #120002 100%); color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 15px; gap: 12px; }
 
+        /* Telegram Only Block Screen */
+        #browserBlock { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #120002; z-index: 9999; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; }
+        #browserBlock h2 { color: #ff4757; margin-bottom: 10px; font-size: 22px; }
+        #browserBlock p { color: #ccc; font-size: 13px; margin-bottom: 20px; }
+
         .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 15px; border: 1px solid rgba(255, 215, 0, 0.2); }
         .user-info { font-size: 13px; font-weight: 600; color: #ffd700; }
         .balance-card { background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 14px; }
@@ -46,6 +51,12 @@
     </style>
 </head>
 <body>
+
+    <!-- Browser Block Overlay -->
+    <div id="browserBlock">
+        <h2>🚫 Access Denied</h2>
+        <p>This game can only be played inside the official Telegram Mini App.</p>
+    </div>
 
     <div class="top-bar">
         <div class="user-info" id="username">Player</div>
@@ -88,10 +99,21 @@
         </div>
     </div>
 
-    <!-- Firebase SDK (v9/v10 Modular) -->
+    <!-- Security Script & Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Strictly verify Telegram WebApp context
+        const tg = window.Telegram?.WebApp;
+        const isTelegramApp = tg && tg.initData && tg.initDataUnsafe?.user;
+
+        if (!isTelegramApp) {
+            document.getElementById('browserBlock').style.display = 'flex';
+            throw new Error("Direct browser access blocked.");
+        } else {
+            tg.expand();
+        }
 
         const firebaseConfig = {
             apiKey: "AIzaSyDaP1bkkFocKMgftJgEI6KdMSzWIbf3eYg",
@@ -106,11 +128,8 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const tg = window.Telegram?.WebApp;
-        if (tg) tg.expand();
-
-        const userId = tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "guest_user";
-        const userName = tg?.initDataUnsafe?.user?.first_name || "Player";
+        const userId = String(tg.initDataUnsafe.user.id);
+        const userName = tg.initDataUnsafe.user.first_name || "Player";
         document.getElementById('username').innerText = userName;
 
         let coins = parseInt(localStorage.getItem('user_coins')) || 0;
@@ -224,8 +243,19 @@
         }
         drawWheel();
 
-        function spinWheel() {
+        async function spinWheel() {
             if (isSpinning) return;
+
+            // 1. Show Ad before spin starts
+            if (AdController) {
+                try {
+                    await AdController.show();
+                } catch (error) {
+                    console.log("Ad load failed or skipped:", error);
+                }
+            }
+
+            // 2. Start Spin after Ad finishes/closes
             isSpinning = true;
             const randomIndex = Math.floor(Math.random() * 8);
             const stopAngle = (360 - (randomIndex * 45)) - 22.5 - 90;
@@ -243,8 +273,6 @@
                 canvas.style.transition = 'none';
                 canvas.style.transform = `rotate(${stopAngle % 360}deg)`;
                 setTimeout(() => canvas.style.transition = 'transform 4s cubic-bezier(0.15, 0.99, 0.18, 0.99)', 50);
-
-                if (AdController) AdController.show().catch(()=>{});
             }, 4000);
         }
 
