@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anaya Arcade - Spin & Win</title>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Adsgram SDK -->
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; user-select: none; }
+        body { background: radial-gradient(circle, #3a0007 0%, #120002 100%); color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 15px; gap: 12px; }
+
+        .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 15px; border: 1px solid rgba(255, 215, 0, 0.2); }
+        .user-info { font-size: 13px; font-weight: 600; color: #ffd700; }
+        .balance-card { background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 14px; }
+
+        .wheel-container { position: relative; width: 280px; height: 280px; display: flex; justify-content: center; align-items: center; margin: 5px 0; }
+        .wheel-outer-ring { position: absolute; width: 270px; height: 270px; border-radius: 50%; border: 6px solid #b8860b; box-shadow: 0 0 20px #ff4500; background: repeating-conic-gradient(#ffd700 0deg 10deg, #8b0000 10deg 20deg); z-index: 1; }
+        #canvas { width: 240px; height: 240px; border-radius: 50%; position: relative; z-index: 2; transition: transform 4s cubic-bezier(0.15, 0.99, 0.18, 0.99); }
+        .pointer { position: absolute; top: -5px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 24px solid #ffd700; z-index: 10; }
+        .center-btn { position: absolute; width: 50px; height: 50px; background: radial-gradient(circle, #ffe066, #b8860b); border-radius: 50%; z-index: 5; border: 3px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #8b0000; font-size: 10px; }
+
+        .btn-group { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+        .main-btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+        .spin-btn { background: linear-gradient(180deg, #ff4500, #8b0000); color: #fff; border: 1px solid #ffd700; }
+        .withdraw-btn { background: linear-gradient(180deg, #2ed573, #1e90ff); color: #fff; }
+        .admin-panel-btn { background: rgba(255, 215, 0, 0.15); color: #ffd700; border: 1px dashed #ffd700; padding: 6px; font-size: 11px; }
+
+        /* History */
+        .history-card { width: 100%; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 12px; padding: 10px; }
+        .history-title { font-size: 12px; color: #ffd700; margin-bottom: 6px; font-weight: 600; }
+        .history-list { display: flex; flex-direction: column; gap: 6px; max-height: 140px; overflow-y: auto; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 6px 10px; border-radius: 6px; font-size: 11px; }
+        
+        .status-badge { padding: 2px 6px; border-radius: 10px; font-weight: 700; font-size: 9px; text-transform: uppercase; }
+        .status-pending { background: #ff9f43; color: #000; }
+        .status-success { background: #2ed573; color: #000; }
+        .status-failed { background: #ff4757; color: #fff; }
+
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99; justify-content: center; align-items: center; }
+        .modal-content { background: #1a0507; border: 2px solid #ffd700; padding: 15px; border-radius: 14px; width: 90%; max-width: 340px; text-align: center; }
+        .modal select, .modal input { width: 100%; padding: 8px; margin: 5px 0; border-radius: 6px; border: 1px solid rgba(255,215,0,0.3); background: #2a0a0d; color: #fff; }
+        .action-mini-btn { padding: 4px 8px; font-size: 10px; border-radius: 4px; border: none; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="user-info" id="username">Player</div>
+        <div class="balance-card">🪙 <span id="balance">0</span></div>
+    </div>
+
+    <button class="main-btn admin-panel-btn" onclick="openAdminPanel()">👑 Admin Mode</button>
+
+    <div class="wheel-container">
+        <div class="pointer"></div>
+        <div class="wheel-outer-ring"></div>
+        <canvas id="canvas" width="400" height="400"></canvas>
+        <div class="center-btn">SPIN</div>
+    </div>
+
+    <div class="btn-group">
+        <button class="main-btn spin-btn" id="spinBtn" onclick="spinWheel()">Spin Now</button>
+        <button class="main-btn withdraw-btn" onclick="openWithdraw()">Withdraw Coins</button>
+    </div>
+
+    <div class="history-card">
+        <div class="history-title">📋 Live Withdrawal History</div>
+        <div class="history-list" id="historyList">
+            <div style="font-size:10px; opacity:0.6; text-align:center;">Loading database...</div>
+        </div>
+    </div>
+
+    <!-- User Withdrawal Modal -->
+    <div class="modal" id="withdrawModal">
+        <div class="modal-content">
+            <h3 style="color:#ffd700; font-size: 16px;">Redeem Rewards</h3>
+            <p style="font-size:10px; color:#ffaa00; margin-bottom:8px;">Min Withdrawal: 10,000 Coins</p>
+            <select id="withdrawMethod">
+                <option value="UPI">UPI Transfer</option>
+                <option value="GooglePlay">Google Play Code</option>
+                <option value="Amazon">Amazon Gift Card</option>
+            </select>
+            <input type="text" id="userAddress" placeholder="Enter UPI ID / Email">
+            <input type="number" id="withdrawAmount" placeholder="Enter Coins Amount">
+            <button class="main-btn withdraw-btn" style="margin-top:8px;" onclick="processWithdrawal()">Submit Request</button>
+            <button class="main-btn" style="background:#444; color:#fff; margin-top:4px;" onclick="closeWithdraw()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Admin Panel Modal -->
+    <div class="modal" id="adminModal">
+        <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+            <h3 style="color:#ffd700; font-size: 15px;">👑 Admin Approvals (Cloud Realtime)</h3>
+            <div id="adminRequestList" style="display:flex; flex-direction:column; gap:8px; margin: 10px 0;"></div>
+            <button class="main-btn" style="background:#444; color:#fff;" onclick="closeAdminPanel()">Close Admin</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (v9/v10 Modular) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDaP1bkkFocKMgftJgEI6KdMSzWIbf3eYg",
+            authDomain: "anaya-arcade.firebaseapp.com",
+            projectId: "anaya-arcade",
+            storageBucket: "anaya-arcade.firebasestorage.app",
+            messagingSenderId: "696770907274",
+            appId: "1:696770907274:web:7f97050a29b58976c97173",
+            measurementId: "G-BZNPDHL9R2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const tg = window.Telegram?.WebApp;
+        if (tg) tg.expand();
+
+        const userId = tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "guest_user";
+        const userName = tg?.initDataUnsafe?.user?.first_name || "Player";
+        document.getElementById('username').innerText = userName;
+
+        let coins = parseInt(localStorage.getItem('user_coins')) || 100;
+        document.getElementById('balance').innerText = coins;
+
+        window.updateBalance = function(newCoins) {
+            coins = newCoins;
+            localStorage.setItem('user_coins', coins);
+            document.getElementById('balance').innerText = coins;
+        };
+
+        // Realtime Firestore Listener for History
+        const withdrawRef = collection(db, "withdrawals");
+        
+        onSnapshot(withdrawRef, (snapshot) => {
+            const list = document.getElementById('historyList');
+            list.innerHTML = '';
+            
+            let userDocs = [];
+            snapshot.forEach(docSnap => {
+                let data = docSnap.data();
+                if(data.userId === userId) {
+                    userDocs.push({ id: docSnap.id, ...data });
+                }
+            });
+
+            if (userDocs.length === 0) {
+                list.innerHTML = '<div style="font-size:10px; opacity:0.6; text-align:center;">No withdrawal history found.</div>';
+                return;
+            }
+
+            userDocs.sort((a,b) => b.createdAt - a.createdAt).forEach(item => {
+                let statusClass = item.status === 'Pending' ? 'status-pending' : (item.status === 'Successful' ? 'status-success' : 'status-failed');
+                list.innerHTML += `
+                    <div class="history-item">
+                        <div>
+                            <div><b>${item.amount} Coins</b> (${item.method})</div>
+                            <div style="font-size:9px; opacity:0.6;">${item.address}</div>
+                        </div>
+                        <span class="status-badge ${statusClass}">${item.status}</span>
+                    </div>
+                `;
+            });
+        });
+
+        // Submit Withdrawal to Cloud Firestore
+        window.processWithdrawal = async function() {
+            const method = document.getElementById('withdrawMethod').value;
+            const address = document.getElementById('userAddress').value.trim();
+            const amount = parseInt(document.getElementById('withdrawAmount').value);
+
+            if (!address) return alert("Enter payment address!");
+            if (isNaN(amount) || amount < 10000) return alert("Minimum withdrawal is 10,000 Coins!");
+            if (amount > coins) return alert("Insufficient Balance!");
+
+            window.updateBalance(coins - amount);
+
+            try {
+                await addDoc(withdrawRef, {
+                    userId: userId,
+                    userName: userName,
+                    amount: amount,
+                    method: method,
+                    address: address,
+                    status: 'Pending',
+                    createdAt: Date.now()
+                });
+                closeWithdraw();
+                alert("Withdrawal request sent to Admin successfully!");
+            } catch (err) {
+                alert("Error sending request to Firebase database.");
+            }
+        };
+
+        // Admin Approval Realtime Render
+        window.renderAdminList = function() {
+            onSnapshot(withdrawRef, (snapshot) => {
+                const list = document.getElementById('adminRequestList');
+                list.innerHTML = '';
+                
+                let pendingItems = [];
+                snapshot.forEach(docSnap => {
+                    let data = docSnap.data();
+                    if(data.status === 'Pending') {
+                        pendingItems.push({ id: docSnap.id, ...data });
+                    }
+                });
+
+                if (pendingItems.length === 0) {
+                    list.innerHTML = '<div style="font-size:11px; color:#aaa;">No pending requests right now.</div>';
+                    return;
+                }
+
+                pendingItems.forEach(item => {
+                    list.innerHTML += `
+                        <div style="background:rgba(255,255,255,0.08); padding:8px; border-radius:6px; font-size:11px; text-align:left;">
+                            <div><b>User:</b> ${item.userName} (ID: ${item.userId})</div>
+                            <div><b>Amount:</b> ${item.amount} Coins</div>
+                            <div><b>Details:</b> ${item.method} - ${item.address}</div>
+                            <div style="margin-top:6px; display:flex; gap:5px;">
+                                <button class="action-mini-btn" style="background:#2ed573; color:#000;" onclick="updateFirebaseStatus('${item.id}', 'Successful', ${item.amount})">Approve</button>
+                                <button class="action-mini-btn" style="background:#ff4757; color:#fff;" onclick="updateFirebaseStatus('${item.id}', 'Failed', ${item.amount})">Reject</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        };
+
+        // Update Status in Firestore
+        window.updateFirebaseStatus = async function(docId, newStatus, reqAmount) {
+            try {
+                const docToUpdate = doc(db, "withdrawals", docId);
+                await updateDoc(docToUpdate, { status: newStatus });
+                
+                if(newStatus === 'Failed') {
+                    alert("Request rejected.");
+                } else {
+                    alert("Request approved successfully!");
+                }
+            } catch(e) {
+                alert("Database Update Failed!");
+            }
+        };
+    </script>
+
+    <script>
+        // Non-module Adsgram & Spin Logic
+        const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "39716" }) : null;
+        const ADMIN_PIN = "1234"; 
+
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const segments = [
+            { text: "100", value: 100, color: "#d63031" },
+            { text: "200", value: 200, color: "#f1c40f" },
+            { text: "500", value: 500, color: "#d63031" },
+            { text: "LOSE", value: 0, color: "#f1c40f" },
+            { text: "1000", value: 1000, color: "#d63031" },
+            { text: "200", value: 200, color: "#f1c40f" },
+            { text: "500", value: 500, color: "#d63031" },
+            { text: "LOSE", value: 0, color: "#f1c40f" }
+        ];
+        let isSpinning = false;
+
+        function drawWheel() {
+            for (let i = 0; i < 8; i++) {
+                const angle = i * (Math.PI / 4);
+                ctx.beginPath();
+                ctx.fillStyle = segments[i].color;
+                ctx.moveTo(200, 200);
+                ctx.arc(200, 200, 200, angle, angle + (Math.PI / 4));
+                ctx.fill();
+                ctx.strokeStyle = "#b8860b";
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(200, 200);
+                ctx.rotate(angle + (Math.PI / 8));
+                ctx.textAlign = "right";
+                ctx.fillStyle = segments[i].color === "#f1c40f" ? "#8b0000" : "#ffffff";
+                ctx.font = "bold 22px Poppins";
+                ctx.fillText(segments[i].text, 170, 8);
+                ctx.restore();
+            }
+        }
+        drawWheel();
+
+        function spinWheel() {
+            if (isSpinning) return;
+            isSpinning = true;
+            const randomIndex = Math.floor(Math.random() * 8);
+            const stopAngle = (360 - (randomIndex * 45)) - 22.5 - 90;
+            canvas.style.transform = `rotate(${2160 + stopAngle}deg)`;
+
+            setTimeout(() => {
+                isSpinning = false;
+                const winAmount = segments[randomIndex].value;
+                if (winAmount > 0) {
+                    window.updateBalance(parseInt(document.getElementById('balance').innerText) + winAmount);
+                    alert(`🎉 You won ${winAmount} Coins!`);
+                } else {
+                    alert("❌ Better luck next time!");
+                }
+                canvas.style.transition = 'none';
+                canvas.style.transform = `rotate(${stopAngle % 360}deg)`;
+                setTimeout(() => canvas.style.transition = 'transform 4s cubic-bezier(0.15, 0.99, 0.18, 0.99)', 50);
+
+                if (AdController) AdController.show().catch(()=>{});
+            }, 4000);
+        }
+
+        function openWithdraw() { document.getElementById('withdrawModal').style.display = 'flex'; }
+        function closeWithdraw() { document.getElementById('withdrawModal').style.display = 'none'; }
+        
+        function openAdminPanel() {
+            let pin = prompt("Enter Admin Secret PIN:");
+            if (pin === ADMIN_PIN) {
+                if(window.renderAdminList) window.renderAdminList();
+                document.getElementById('adminModal').style.display = 'flex';
+            } else if(pin !== null) {
+                alert("Incorrect PIN Code!");
+            }
+        }
+        function closeAdminPanel() { document.getElementById('adminModal').style.display = 'none'; }
+    </script>
+</body>
+  </html>
+  
